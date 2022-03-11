@@ -1,3 +1,6 @@
+install.packages('mice')
+install.packages("VIM")
+
 #Load data
 #change code
 datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
