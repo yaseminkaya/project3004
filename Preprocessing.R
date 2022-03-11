@@ -1,4 +1,5 @@
 #Load data
+#change code
 datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
 deaths <- read.csv(paste0(datafolder, "BBS3004_deaths.csv"), header = TRUE)
 demo <- read.csv(paste0(datafolder, "BBS3004_demographics.csv"), header = TRUE)
