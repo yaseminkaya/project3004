@@ -1,9 +1,6 @@
-install.packages('mice')
-install.packages("VIM")
 
 #Load data
-#change code
-#change code 2
+
 datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
 deaths <- read.csv(paste0(datafolder, "BBS3004_deaths.csv"), header = TRUE)
 demo <- read.csv(paste0(datafolder, "BBS3004_demographics.csv"), header = TRUE)
