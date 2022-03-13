@@ -1,6 +1,7 @@
 #Load data
-#change code
-datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
+
+#datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
+datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
 deaths <- read.csv(paste0(datafolder, "BBS3004_deaths.csv"), header = TRUE)
 demo <- read.csv(paste0(datafolder, "BBS3004_demographics.csv"), header = TRUE)
 hosp <- read.csv(paste0(datafolder, "BBS3004_hospitalisations.csv"), header = TRUE)
@@ -10,6 +11,7 @@ visits <- read.csv(paste0(datafolder, "BBS3004_visits.csv"), header = TRUE)
 
 #Invert the table of labvalues #pivot_wider
 #.libPaths("C:/Users/Punkt/Downloads/R/RStudio")
+
 library(magrittr)
 library(tidyr)
 
@@ -18,42 +20,23 @@ lab_inv <- lab %>%
 
 
 #Create a common table for visits, labs and demo #reason for hospitalization
-# we could use merge function
-merged_table <- data.frame()
-for (k in 1:nrow(visits)) {
-  for (q in 1:nrow(demo)) {
-    if (demo$id[q] == visits$id[k]) {
-      New_Row <- data.frame(id=demo$id[q],
-                            DATE=visits$date[k],
-                            age=demo$age[q],
-                            gender=demo$gender[q],
-                            causeHF=demo$causeHF[q],
-                            date_of_diagnosis=demo$date_of_diagnosis[q],
-                            orthopnea=visits$orthopnea[k],
-                            oedema=visits$oedema[k],
-                            cough=visits$cough[k],
-                            rales=visits$rales[k],
-                            "NT-BNP"=lab_inv$`NT-BNP`[k],
-                            "CRP sensitive"=lab_inv$`CRP sensitive`[k],
-                            "IL-6"=lab_inv$`IL-6`[k],
-                            "GFR"=lab_inv$GFR[k],
-                            "Cystatin C"=lab_inv$`Cystatin C`[k])      
-      
-      merged_table <- rbind(merged_table, New_Row) 
-    }
-  }
-}
+
+merged_table <- merge(x = visits, y = merge(x = merged_table, y = demo, by = "id"))
+merged_table = merged_table[,!grepl(".x$",names(merged_table))]
+merged_table = merged_table[,!grepl(".y$",names(merged_table))]
+
 
 #initialize to 0, set back to 1
 #hospitalization within 60
+
 for (a in 1:nrow(merged_table)) {
   for (b in 1:nrow(hosp)) {
     if (merged_table$id[a] == hosp$id[b]) {
       if (difftime((as.Date(hosp$date[b])),
-                   (as.Date(merged_table$DATE[a])),
+                   (as.Date(merged_table$date[a])),
                    units = "days") <= 60 &
           difftime((as.Date(hosp$date[b])),
-                   (as.Date(merged_table$DATE[a])), 
+                   (as.Date(merged_table$date[a])), 
                    units = "days") > 0) {
         merged_table$label_hosp[a] <- '1'
         break
@@ -65,7 +48,9 @@ for (a in 1:nrow(merged_table)) {
   }
 }
 
+
 #Death within 60 days
+
 for (a in 1:nrow(merged_table)) {
   for (c in 1:nrow(deaths)) {
     if (merged_table$id[a] == deaths$id[c]) {
@@ -74,10 +59,10 @@ for (a in 1:nrow(merged_table)) {
       }
       else {
         if (difftime((as.Date(deaths$date_of_death[c])),
-                     (as.Date(merged_table$DATE[a])),
+                     (as.Date(merged_table$date[a])),
                      units = "days") <= 60 &
             difftime((as.Date(deaths$date_of_death[c])),
-                     (as.Date(merged_table$DATE[a])), 
+                     (as.Date(merged_table$date[a])), 
                      units = "days") > 0) {
           merged_table$label_death[a] <- '1'
           break
@@ -95,13 +80,15 @@ for (a in 1:nrow(merged_table)) {
 
 for (a in 1:nrow(merged_table)) {
   merged_table$label[a] <- 
-    if (merged_table$label_1[a] == 1 || merged_table$label_2[a] == 1){
+    if (merged_table$label_hosp[a] == 1 || merged_table$label_death[a] == 1){
       1
     } else {0}}
+merged_table = merged_table[,!grepl("hosp$",names(merged_table))]
+merged_table = merged_table[,!grepl("death$",names(merged_table))]
 
 
 #Outliers IQR for numerical predictors
-#No outliers for Age and Biomarkers
+#No outliers for Age and Biomarkers, except NT-BNP (93 observations)
 
 outliers <- function(x) {
   
@@ -114,19 +101,21 @@ outliers <- function(x) {
   return(outliers)
 }
 
-A <- outliers(merged_table$NT.BNP)
-hist(log(merged_table$NT.BNP))
+A <- outliers(merged_table$`NT-BNP`)
+hist(log(merged_table$`NT-BNP`))
 #outliers in NT.BNP --> not normally distributed
+
 
 #Update age of the patient
 
-merged_table$data_diff<-difftime(as.Date(merged_table$DATE), as.Date(merged_table$date_of_diagnosis), units = "years")
-merged_table$age <- merged_table$age + merged_table$data_diff
+merged_table$data_diff<-difftime(as.Date(merged_table$date), as.Date(merged_table$date_of_diagnosis), units = "days")
+merged_table$age <- merged_table$age + (merged_table$data_diff/365)
 merged_table = merged_table[,!grepl("^data_diff",names(merged_table))]
 
-#imputation of missing values
-#MICE
-# Install necessary packages
+
+#Imputation of missing values - MICE
+
+#Install necessary packages
 install.packages("mice")
 install.packages("VIM")
 install.packages("Rcpp")
@@ -134,7 +123,9 @@ library("mice")
 library("VIM")
 library("Rcpp")
 
-# Visualize what is missing
+
+#Visualize what is missing
+
 pMiss <- function(x){sum(is.na(x))/length(x)*100}
 apply(merged_table,2,pMiss)
 apply(merged_table,1,pMiss)
@@ -143,24 +134,44 @@ aggr_plot <- aggr(merged_table, col=c('navyblue','red'), numbers=TRUE, sortVars=
                   labels=names(data), cex.axis=.7, gap=3, 
                   ylab=c("Histogram of missing data","Pattern"))
 
-# necessary columns as factor, can also be already done in earlier part of code
+
+#Necessary columns as factor, can also be already done in earlier part of code
+
 merged_table$orthopnea <- as.factor(merged_table$orthopnea)
 merged_table$oedema <- as.factor(merged_table$oedema)
 merged_table$cough <- as.factor(merged_table$cough)
 merged_table$rales <- as.factor(merged_table$rales)
 
-#imputation
+
+#Imputation
+
 imputed_data <- mice(merged_table, m=5, method = "rf")
 summary(imputed_data)
 imputed_merged_table <- complete(imputed_data, 1)
 
+
 #KNN
+
 impute <- kNN(merged_table, variable = c("orthopnea", "oedema", "cough", "rales"), k = 10)
 
 
-# optimize code
-# delete rows with other hospitalization (1 = hospitalization due to worsening CHF and death)
+#PCA
 
+install.packages('caret')
+library(caret)
+merged_table <- na.exclude(merged_table)
+
+smp_size <- floor(0.8 * nrow(merged_table))
+set.seed(123)
+train_ind <- sample(seq_len(nrow(merged_table)), size = smp_size)
+train <- merged_table[train_ind, ]
+test <- merged_table[-train_ind, ]
+
+preProc <- preProcess(train[3],method="pca",pcaComp=2)
+trainPCA <- predict(preProc, train[3])
+model <- train(train$label ~ .,method="glm",data=trainPCA)
+testPCA <- predict(preProc,test[3])
+predictions_test<-predict(model,testPCA)
 
 
 
