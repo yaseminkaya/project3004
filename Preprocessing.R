@@ -1,12 +1,8 @@
-
 #Load data
 
-<<<<<<< HEAD
 #datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
 datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
-=======
-datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
->>>>>>> 86888fa2b98af67b7d63b84c2c0c259cf8fb914c
+
 deaths <- read.csv(paste0(datafolder, "BBS3004_deaths.csv"), header = TRUE)
 demo <- read.csv(paste0(datafolder, "BBS3004_demographics.csv"), header = TRUE)
 hosp <- read.csv(paste0(datafolder, "BBS3004_hospitalisations.csv"), header = TRUE)
