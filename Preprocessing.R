@@ -103,7 +103,6 @@ merged_table = merged_table[,!grepl("^data_diff",names(merged_table))]
 
 
 #Imputation of missing values - MICE
-
 #Install necessary packages
 install.packages("mice")
 install.packages("VIM")
@@ -114,7 +113,6 @@ library("Rcpp")
 
 
 #Visualize what is missing
-
 pMiss <- function(x){sum(is.na(x))/length(x)*100}
 apply(merged_table,2,pMiss)
 apply(merged_table,1,pMiss)
@@ -125,7 +123,6 @@ aggr_plot <- aggr(merged_table, col=c('navyblue','red'), numbers=TRUE, sortVars=
 
 
 #Necessary columns as factor, can also be already done in earlier part of code
-
 merged_table$orthopnea <- as.factor(merged_table$orthopnea)
 merged_table$oedema <- as.factor(merged_table$oedema)
 merged_table$cough <- as.factor(merged_table$cough)
@@ -133,16 +130,11 @@ merged_table$rales <- as.factor(merged_table$rales)
 
 
 #Imputation
-
 imputed_data <- mice(merged_table, m=5, method = "rf")
 summary(imputed_data)
 imputed_merged_table <- complete(imputed_data, 1)
-
-
-#KNN
-
-impute <- kNN(merged_table, variable = c("orthopnea", "oedema", "cough", "rales"), k = 10)
-
+#Here I used random forest, maxit and m is on default and I chose model 1. However when we have an actual model we can play around with these and see what results in the best model.
+#We also only need to impute for the training data set, but I was not sure if tht already holds true for the pca or only for the model train and test split
 
 #PCA
 
