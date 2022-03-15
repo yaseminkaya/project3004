@@ -20,16 +20,16 @@ lab_inv <- lab %>%
   pivot_wider(names_from = biomarker, values_from = value)
 
 
-#Create a common table for visits, labs and demo #reason for hospitalization
+#Create a common table for visits, labs and demo
 
-merged_table <- merge(x = visits, y = merge(x = merged_table, y = demo, by = "id"))
-merged_table = merged_table[,!grepl(".x$",names(merged_table))]
-merged_table = merged_table[,!grepl(".y$",names(merged_table))]
+merged_table <- data.frame()
+merged_table <- merge(x = visits, y = lab_inv)
+merged_table <- merge(x = merged_table, y = demo, by = "id")
 
 
-#initialize to 0, set back to 1
 #hospitalization within 60
 
+merged_table$label_hosp <- 0
 for (a in 1:nrow(merged_table)) {
   for (b in 1:nrow(hosp)) {
     if (merged_table$id[a] == hosp$id[b]) {
@@ -40,10 +40,6 @@ for (a in 1:nrow(merged_table)) {
                    (as.Date(merged_table$date[a])), 
                    units = "days") > 0) {
         merged_table$label_hosp[a] <- '1'
-        break
-      }
-      else {
-        merged_table$label_hosp[a] <- '0'
       }
     }
   }
@@ -52,25 +48,17 @@ for (a in 1:nrow(merged_table)) {
 
 #Death within 60 days
 
+merged_table$label_death <- 0
 for (a in 1:nrow(merged_table)) {
   for (c in 1:nrow(deaths)) {
     if (merged_table$id[a] == deaths$id[c]) {
-      if (is.na(deaths$date_of_death[c])) {
-        merged_table$label_death[a] <- '0'
-      }
-      else {
-        if (difftime((as.Date(deaths$date_of_death[c])),
+      if (!is.na(deaths$date_of_death[c]) & difftime((as.Date(deaths$date_of_death[c])),
                      (as.Date(merged_table$date[a])),
                      units = "days") <= 60 &
             difftime((as.Date(deaths$date_of_death[c])),
                      (as.Date(merged_table$date[a])), 
                      units = "days") > 0) {
           merged_table$label_death[a] <- '1'
-          break
-        }
-        else {
-          merged_table$label_death[a] <- '0'
-        }
       }
     }
   }
@@ -158,7 +146,6 @@ impute <- kNN(merged_table, variable = c("orthopnea", "oedema", "cough", "rales"
 
 #PCA
 
-install.packages('caret')
 library(caret)
 merged_table <- na.exclude(merged_table)
 
@@ -168,10 +155,13 @@ train_ind <- sample(seq_len(nrow(merged_table)), size = smp_size)
 train <- merged_table[train_ind, ]
 test <- merged_table[-train_ind, ]
 
-preProc <- preProcess(train[3],method="pca",pcaComp=2)
-trainPCA <- predict(preProc, train[3])
-model <- train(train$label ~ .,method="glm",data=trainPCA)
-testPCA <- predict(preProc,test[3])
+label <- train
+train <- train[7:9]
+
+preProc <- preProcess(train,method="pca",pcaComp=2)
+trainPCA <- predict(preProc, train)
+model <- train(label$label ~ .,family=binomial(link='logit'),data=trainPCA)
+testPCA <- predict(preProc,test)
 predictions_test<-predict(model,testPCA)
 
 
