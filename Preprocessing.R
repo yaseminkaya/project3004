@@ -1,8 +1,8 @@
 #Load data
 
 #datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
-#datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
-datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
+datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
+#datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
 
 deaths <- read.csv(paste0(datafolder, "BBS3004_deaths.csv"), header = TRUE)
 demo <- read.csv(paste0(datafolder, "BBS3004_demographics.csv"), header = TRUE)
@@ -81,6 +81,7 @@ merged_table = merged_table[,!grepl("death$",names(merged_table))]
 
 #Outliers IQR for numerical predictors
 #No outliers for Age and Biomarkers, except NT-BNP (93 observations)
+#outliers in NT.BNP --> not normally distributed
 
 outliers <- function(x) {
   
@@ -95,18 +96,17 @@ outliers <- function(x) {
 
 A <- outliers(merged_table$`NT-BNP`)
 hist(log(merged_table$`NT-BNP`))
-#outliers in NT.BNP --> not normally distributed
 
 
 #Update age of the patient
 
 merged_table$data_diff<-difftime(as.Date(merged_table$date), as.Date(merged_table$date_of_diagnosis), units = "days")
-merged_table$age <- merged_table$age + (merged_table$data_diff/365)
+merged_table$age <- as.integer(merged_table$age + (merged_table$data_diff/365))
 merged_table = merged_table[,!grepl("^data_diff",names(merged_table))]
 
 
 #Imputation of missing values - MICE
-#Install necessary packages
+
 #install.packages("mice")
 #install.packages("VIM")
 #install.packages("Rcpp")
@@ -130,41 +130,65 @@ merged_table$orthopnea <- as.factor(merged_table$orthopnea)
 merged_table$oedema <- as.factor(merged_table$oedema)
 merged_table$cough <- as.factor(merged_table$cough)
 merged_table$rales <- as.factor(merged_table$rales)
+
 #| rename columns because of the spaces
+names(merged_table)[7] <- 'B1'
+names(merged_table)[8] <- 'B2'
+names(merged_table)[9] <- 'B3'
+names(merged_table)[10] <- 'B4'
+names(merged_table)[11] <- 'B5'
+
 #| remove columns labels and make temporary merge file for imputation
-#| PCA is pre-processing stage
-#| impute for training test? -> how many samples with no missing values 1129
-#| use these for test set, small sample size , impute test set so all
-#| remove label column
+temp_merged <- merged_table[-16]
 
 #Imputation 
-imputed_data <- mice(merged_table, m=5, method = "rf")
+imputed_data <- mice(temp_merged, m=5, method = "rf")
 summary(imputed_data)
 imputed_merged_table <- complete(imputed_data, 1)
 #Here I used random forest, maxit and m is on default and I chose model 1. However when we have an actual model we can play around with these and see what results in the best model.
-#We also only need to impute for the training data set, but I was not sure if tht already holds true for the pca or only for the model train and test split
+
 
 #PCA
-#| make numerical values leave them there
-#| make intergers 
-#| remove label beforehand
-install.packages('caret')
+
 library(caret)
-merged_table <- na.exclude(merged_table)
+preProc <- preProcess(imputed_merged_table,method="pca",pcaComp=3)
+trainPCA <- predict(preProc, imputed_merged_table)
 
-smp_size <- floor(0.8 * nrow(merged_table))
-set.seed(123)
-train_ind <- sample(seq_len(nrow(merged_table)), size = smp_size)
-train <- merged_table[train_ind, ]
-test <- merged_table[-train_ind, ]
 
-#pca<- prcomp(train[,c(7:11)], center = TRUE, scale. = TRUE)
+#SVM
 
-preProc <- preProcess(train,method="pca",pcaComp=2)
-trainPCA <- predict(preProc, train)
-model <- train(train$label ~ .,method = "rf",data=trainPCA[,11:12])
-testPCA <- predict(preProc,test)
-predictions_test<-predict(model,testPCA)
+set.seed(2308)
+trainPCA <- trainPCA[-c(1:2,9)]
+trainPCA$label <- as.factor(merged_table$label)
+intrain <- createDataPartition(y = trainPCA$label, p= 0.8, list = FALSE)
+train <- trainPCA[intrain,]
+test <- trainPCA[-intrain,]
+
+library(dplyr)
+train <- train  %>% 
+  mutate(label = factor(label, 
+                        labels = make.names(levels(label))))
+
+train_control <- trainControl(method="cv", number=5, classProbs = TRUE, summaryFunction = twoClassSummary)
+svm_Linear <- train(label ~., data = train, method = "svmLinear",
+                    trControl=train_control,
+                    metric = "ROC")
+svm_Linear
+
+test <- test  %>% 
+  mutate(label = factor(label, 
+                        labels = make.names(levels(label))))
+
+test_pred <- predict(svm_Linear, newdata = test)
+
+#AUC
+
+#install.packages("pROC")
+library(pROC)
+roc_obj <- roc(test$label, as.integer(test_pred))
+plot(roc_obj)
+auc(roc_obj)
+
 
 
 
