@@ -107,9 +107,9 @@ merged_table = merged_table[,!grepl("^data_diff",names(merged_table))]
 
 #Imputation of missing values - MICE
 #Install necessary packages
-install.packages("mice")
-install.packages("VIM")
-install.packages("Rcpp")
+#install.packages("mice")
+#install.packages("VIM")
+#install.packages("Rcpp")
 library("mice")
 library("VIM")
 library("Rcpp")
@@ -130,9 +130,14 @@ merged_table$orthopnea <- as.factor(merged_table$orthopnea)
 merged_table$oedema <- as.factor(merged_table$oedema)
 merged_table$cough <- as.factor(merged_table$cough)
 merged_table$rales <- as.factor(merged_table$rales)
+#| rename columns because of the spaces
+#| remove columns labels and make temporary merge file for imputation
+#| PCA is pre-processing stage
+#| impute for training test? -> how many samples with no missing values 1129
+#| use these for test set, small sample size , impute test set so all
+#| remove label column
 
-
-#Imputation
+#Imputation 
 imputed_data <- mice(merged_table, m=5, method = "rf")
 summary(imputed_data)
 imputed_merged_table <- complete(imputed_data, 1)
@@ -140,7 +145,10 @@ imputed_merged_table <- complete(imputed_data, 1)
 #We also only need to impute for the training data set, but I was not sure if tht already holds true for the pca or only for the model train and test split
 
 #PCA
-
+#| make numerical values leave them there
+#| make intergers 
+#| remove label beforehand
+install.packages('caret')
 library(caret)
 merged_table <- na.exclude(merged_table)
 
@@ -150,11 +158,11 @@ train_ind <- sample(seq_len(nrow(merged_table)), size = smp_size)
 train <- merged_table[train_ind, ]
 test <- merged_table[-train_ind, ]
 
-pca<- prcomp(train[,c(7:11)], center = TRUE, scale. = TRUE)
+#pca<- prcomp(train[,c(7:11)], center = TRUE, scale. = TRUE)
 
 preProc <- preProcess(train,method="pca",pcaComp=2)
-trainPCA <- predict(pca, train)
-model <- train(train$label ~ .,method = "glm",data=trainPCA)
+trainPCA <- predict(preProc, train)
+model <- train(train$label ~ .,method = "rf",data=trainPCA[,11:12])
 testPCA <- predict(preProc,test)
 predictions_test<-predict(model,testPCA)
 
