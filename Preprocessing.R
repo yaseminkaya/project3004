@@ -11,7 +11,7 @@ visits <- read.csv(paste0(datafolder, "BBS3004_visits.csv"), header = TRUE)
 
 
 #Invert the table of labvalues #pivot_wider
-#.libPaths("C:/Users/Punkt/Downloads/R/RStudio")
+.libPaths("C:/Users/Punkt/Downloads/R/RStudio")
 
 library(magrittr)
 library(tidyr)
@@ -28,6 +28,14 @@ merged_table <- merge(x = merged_table, y = demo, by = "id")
 
 
 #hospitalization within 60
+
+x <- vector()
+for (a in 1:nrow(hosp)) {
+  if (hosp$reason[a] == "Other"){
+    x <- c(x, a)
+  }
+}
+hosp <- hosp[-x, ]
 
 merged_table$label_hosp <- 0
 for (a in 1:nrow(merged_table)) {
@@ -147,12 +155,11 @@ train_ind <- sample(seq_len(nrow(merged_table)), size = smp_size)
 train <- merged_table[train_ind, ]
 test <- merged_table[-train_ind, ]
 
-label <- train
-train <- train[7:9]
+pca<- prcomp(train[,c(7:11)], center = TRUE, scale. = TRUE)
 
 preProc <- preProcess(train,method="pca",pcaComp=2)
-trainPCA <- predict(preProc, train)
-model <- train(label$label ~ .,family=binomial(link='logit'),data=trainPCA)
+trainPCA <- predict(pca, train)
+model <- train(train$label ~ .,method = "glm",data=trainPCA)
 testPCA <- predict(preProc,test)
 predictions_test<-predict(model,testPCA)
 
