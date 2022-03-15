@@ -1,7 +1,8 @@
 #Load data
 
 #datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
-datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
+#datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
+datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
 
 deaths <- read.csv(paste0(datafolder, "BBS3004_deaths.csv"), header = TRUE)
 demo <- read.csv(paste0(datafolder, "BBS3004_demographics.csv"), header = TRUE)
@@ -45,7 +46,22 @@ for (a in 1:nrow(merged_table)) {
   }
 }
 
+#Select only rows 'Worsening CHF'
+hosp_WCHF <- hosp[hosp$reason == 'Worsening CHF', ]
+# test <- hosp %>% filter(grepl('Worsening CHF', reason))
 
+#Label table instead of original 
+#| label here if patient stayed for the reason CHF not between 0-60 days
+
+#merged_table$loc01 <- ifelse(grepl("Worsening CHF",hosp$reason),'1','0')
+for (a in 1:nrow(merged_table)) {
+  for (b in 1:nrow(hosp)) {
+    if (merged_table$id[a] == hosp$id[b]) {
+      if (grepl("Worsening CHF",hosp$reason)) {
+        merged_table$label_hosp[a] <- '1'
+        break
+      }}}}
+      
 #Death within 60 days
 
 merged_table$label_death <- 0
