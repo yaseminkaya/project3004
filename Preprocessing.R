@@ -94,6 +94,13 @@ outliers <- function(x) {
   return(outliers)
 }
 
+# Create a histogram for NT-BNP distribution to check for outliers
+# Title is 'Histogram of NT-BNP distribution'
+# x-axis label is log(NT-BNP)
+# y-axis label is frequency as default
+# colour of the bar is green and of the border is blue
+# las is 1 changes the orientation of the label values
+
 A <- outliers(merged_table$`NT-BNP`)
 hist(log(merged_table$`NT-BNP`), 
      main = 'Histogram of NT-BNP distribution',
@@ -102,6 +109,12 @@ hist(log(merged_table$`NT-BNP`),
      border = 'blue',
      las = 1)
 
+# Create a histogram for CRP sensitive distribution to check for outliers
+# Title is 'Histogram of CRP sensitive distribution'
+# x-axis label is log(CRP sensitive)
+# y-axis label is frequency as default
+# colour of the bar is blue and of the border is green
+# las is 1 changes the orientation of the label values
 B <- outliers(merged_table$`CRP sensitive`)
 hist(log(merged_table$`CRP sensitive`),
      main = 'Histogram of CRP sensitive distribution',
@@ -110,6 +123,12 @@ hist(log(merged_table$`CRP sensitive`),
      border = 'green',
      las = 1)
 
+# Create a histogram for IL-6 distribution to check for outliers
+# Title is 'Histogram of IL-6 distribution'
+# x-axis label is log(IL-6)
+# y-axis label is frequency as default
+# colour of the bar is blue and of the border is green
+# las is 1 changes the orientation of the label values
 C <- outliers(merged_table$`IL-6`)
 hist(log(merged_table$`IL-6`),
      main = 'Histogram of Il-6 distribution',
@@ -118,6 +137,12 @@ hist(log(merged_table$`IL-6`),
      border = 'green',
      las = 1)
 
+# Create a histogram for GFR distribution to check for outliers
+# Title is 'Histogram of GFR distribution'
+# x-axis label is log(GFR)
+# y-axis label is frequency as default
+# colour of the bar is blue and of the border is green
+# las is 1 changes the orientation of the label values
 D <- outliers(merged_table$`GFR`)
 hist(log(merged_table$`GFR`),
      main = 'Histogram of GFR distribution',
@@ -126,6 +151,12 @@ hist(log(merged_table$`GFR`),
      border = 'green',
      las = 1)
 
+# Create a histogram for Cystatin C distribution to check for outliers
+# Title is 'Histogram of Cystatin C distribution'
+# x-axis label is log(Cystatin C)
+# y-axis label is frequency as default
+# colour of the bar is blue and of the border is green
+# las is 1 changes the orientation of the label values
 E <- outliers(merged_table$`Cystatin C`)
 hist(log(merged_table$`Cystatin C`),
      main = 'Histogram of Cystatin C distribution',
@@ -134,6 +165,12 @@ hist(log(merged_table$`Cystatin C`),
      border = 'green',
      las = 1)
 
+# Create a histogram for age distribution to check for outliers
+# Title is 'Histogram of age distribution'
+# x-axis label is log(age)
+# y-axis label is frequency as default
+# colour of the bar is blue and of the border is green
+# las is 1 changes the orientation of the label values
 F <- outliers(merged_table$`age`)
 hist(log(merged_table$`age`),
      main = 'Histogram of Age distribution',
@@ -288,11 +325,36 @@ roc_obj = plot.roc(test$label, test_pred$X1,
 
 
 
-#descriptives
+# Descriptives
+# Create a boxplot that displays the average age per gender group
+# colours is equal to the first replicate colour pink and the second replicate colour blue
+colours = c(rep("pink",1), rep("blue", 1)) 
 
-boxplot(age~gender, data = merged_table, main = 'Age per gender',
+# boxplot with the title 'Boxplot of the average age per gender group
+# x-axis label is 'gender'
+# y-axis label is 'age'
+# col is equal to colours
+# las is 1 changes the orientation of the label values
+boxplot(age~gender, data = merged_table, main = 'Boxplot of the average age per gender',
         xlab = 'Gender',
-        ylab = 'Ages')
+        ylab = 'Age',
+        col= colours,
+        border = 'green',
+        las = 1)
 
+# Create a boxplot that displays the average age per death status
+# colours is equal to the first replicate colour green and the second replicate colour red
+colours = c(rep("green",1), rep("red", 1)) 
 
+# boxplot with the title 'Boxplot of the average age per death status after 60 days
+# x-axis label is 'death'
+# y-axis label is 'age'
+# col is equal to colours
+# las is 1 changes the orientation of the label values
+boxplot(age~label, data = merged_table, main = 'Boxplot of the average age per death status',
+        xlab = 'Death',
+        ylab = 'Age',
+        col= colours,
+        border = 'blue',
+        las = 1)
 
