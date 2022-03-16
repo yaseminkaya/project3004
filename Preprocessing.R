@@ -187,6 +187,8 @@ svm_Linear <- train(label ~., data = train, method = "svmLinear",
                     metric = "ROC")
 svm_Linear
 
+plot(svm_Linear)
+
 test_pred <- predict(svm_Linear, newdata = test)
 
 
@@ -198,25 +200,24 @@ RF <- train(label ~., data = train, method = "rf",
 
 RF
 
+plot(RF)
+
 test_pred <- predict(RF, newdata = test)
 
 
 #CART
 
-install.packages("rpart")
+#install.packages("rpart")
 library(rpart)
-CART <- rpart(label ~., data = train, method = "class",
+CART <- train(label ~., data = train, method = "rpart",
             trControl=train_control,
             metric = "ROC")
 
 CART
 
-par(xpd = NA)
 plot(CART)
-text(CART, digits = 3)
 
-test_pred <- CART %>% 
-  predict(test, type = "class")
+test_pred <- predict(CART, newdata = test)
 
 
 #AUC
