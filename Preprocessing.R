@@ -274,9 +274,10 @@ auc(roc_obj)
 
 #descriptives
 
-boxplot(age~gender, data = merged_table, main = 'Age per gender',
+colours = c(rep("pink",1), rep("blue", 1))
+boxplot(age~gender, data = merged_table, main = 'Boxplot of the average age per gender',
         xlab = 'Gender',
-        ylab = 'Ages')
-
-
+        ylab = 'Age',
+        col= colours,
+        las = 1)
 
