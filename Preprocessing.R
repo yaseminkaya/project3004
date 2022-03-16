@@ -2,8 +2,8 @@
 
 #datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
 #datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
-#datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
-datafolder <- "C:/UM/BBS3004 The Core of Biomedical Sciences/Data/"
+datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
+#datafolder <- "C:/UM/BBS3004 The Core of Biomedical Sciences/Data/"
 
 deaths <- read.csv(paste0(datafolder, "BBS3004_deaths.csv"), header = TRUE)
 demo <- read.csv(paste0(datafolder, "BBS3004_demographics.csv"), header = TRUE)
@@ -27,6 +27,9 @@ merged_table <- data.frame()
 merged_table <- merge(x = visits, y = lab_inv)
 merged_table <- merge(x = merged_table, y = demo, by = "id")
 
+#| summary missing values 
+colSums(is.na(merged_table))
+#| what kind how percentage from total
 
 #hospitalization within 60
 
@@ -71,7 +74,7 @@ for (a in 1:nrow(merged_table)) {
 #Death or hospitalization in 60 days
 
 for (a in 1:nrow(merged_table)) {
-  merged_table$label[a] <- 
+  merged_table$Label[a] <- 
     if (merged_table$label_hosp[a] == 1 || merged_table$label_death[a] == 1){
       1
     } else {0}}
@@ -315,13 +318,6 @@ roc_obj = plot.roc(test$label, test_pred$X1,
                    print.auc = TRUE)
 
 
-
-
-
-
-
-
-
 # Descriptives
 # Create a boxplot that displays the average age per gender group
 # colours is equal to the first replicate colour pink and the second replicate colour blue
@@ -355,3 +351,57 @@ boxplot(age~label, data = merged_table, main = 'Boxplot of the average age per d
         border = 'blue',
         las = 1)
 
+#data cleaning missing values
+# add group percentages 
+#| percentages 0 and 1 so 0 no worsening in HF and 1 hospitalization or death
+
+library(ggplot2)
+
+
+ggplot(merged_table, aes(x = as.factor(gender), y = ..prop.., group = label, fill = factor(label) )) +
+  geom_bar(position = "dodge") +
+  geom_text(aes(label = scales::percent(..prop..)), 
+            position = position_dodge(width = 0.9), stat = "count", vjust = 2) +
+  labs(x = NULL, y = NULL) +
+  guides(fill = guide_legend(title = "sex")) +                        
+  scale_y_continuous(labels = scales::percent_format())   +              
+  scale_fill_manual(values=c("#b6181f", "#f6b8bb")) +
+  scale_x_discrete(labels = labs)
+
+#trying to get the yaxis from percentage to count.
+#error : on't know how to automatically pick scale for object of type function. Defaulting to continuous
+#present do not yet know to solve
+
+# p1<- ggplot(data=merged_table)
+# p1<- p1+ geom_bar(aes(x = label))
+# p1<- p1+ theme_minimal()
+# 
+# library(scales)
+# p1<- ggplot(data = merged_table)
+# p1<- p1+ geom_bar(aes(x= Label, y=after_stat(count/sum(count))))
+# p1<- p1 + theme_classic()
+# p1<- p1+ scale_y_continuous(labels= percent)
+# p1
+# 
+# p1<- ggplot(data = merged_table)
+# p1<- p1+ geom_bar(aes(x= label, y=(..count../sum(..count..))))
+# p1<- p1 + theme_classic()
+# p1<- p1+ scale_y_continuous(labels= percent)
+# p1
+# 
+# # Convert labelled vector to a factor
+# 
+# mpgCount <- merged_table%>%
+#   dplyr::count(Label)%>%
+#   dplyr::mutate(perc = n/sum(n) * 100)
+# 
+# pl <- ggplot (data = merged_table, aes(x = Label, y = n, fill = class))
+# pl <- pl + geom_col()
+# pl <- pl + geom_text(aes(x = Label, y = n
+#                          , label = paste0(n, " (", round(perc,1),"%)")
+#                          , vjust = -0.5
+#                          
+# ))
+# pl <- pl + theme_classic()
+# pl <- pl + labs(title ="Bar chart showing count and percentage")
+# pl
