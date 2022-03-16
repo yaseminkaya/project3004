@@ -187,9 +187,7 @@ svm_Linear <- train(label ~., data = train, method = "svmLinear",
                     metric = "ROC")
 svm_Linear
 
-plot(svm_Linear)
-
-test_pred <- predict(svm_Linear, newdata = test)
+test_pred <- predict(svm_Linear, newdata = test, type = "prob")
 
 
 #RF
@@ -202,7 +200,9 @@ RF
 
 plot(RF)
 
-test_pred <- predict(RF, newdata = test)
+test_pred <- predict(RF, newdata = test, type = "prob")
+
+plot(varImp(RF, scale = TRUE))
 
 
 #CART
@@ -217,16 +217,29 @@ CART
 
 plot(CART)
 
-test_pred <- predict(CART, newdata = test)
+test_pred <- predict(CART, newdata = test, type = "prob")
+
+plot(varImp(CART, scale = TRUE))
 
 
-#AUC
+#AUC with CI
 
 #install.packages("pROC")
 library(pROC)
-roc_obj <- roc(test$label, as.integer(test_pred))
-plot(roc_obj)
-auc(roc_obj)
+
+roc_obj = plot.roc(test$label, test_pred$X1,
+                   main = "ROC curve",
+                   percent = TRUE,
+                   ci = TRUE,
+                   print.auc = TRUE)
+
+
+
+
+
+
+
+
 
 
 
