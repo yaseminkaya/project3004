@@ -97,7 +97,7 @@ outliers <- function(x) {
 
 A <- outliers(merged_table$`NT-BNP`)
 hist(log(merged_table$`NT-BNP`), 
-     main = 'Histogram of NT-BNP outliers',
+     main = 'Histogram of NT-BNP distribution',
      xlab = 'log(NT-BNP)',
      col = 'green',
      border = 'blue',
@@ -105,7 +105,7 @@ hist(log(merged_table$`NT-BNP`),
 
 B <- outliers(merged_table$`CRP sensitive`)
 hist(log(merged_table$`CRP sensitive`),
-     main = 'Histogram of CRP sensitive outliers',
+     main = 'Histogram of CRP sensitive distribution',
      xlab = 'log(CRP sensitive)',
      col = 'blue',
      border = 'green',
@@ -113,7 +113,7 @@ hist(log(merged_table$`CRP sensitive`),
 
 C <- outliers(merged_table$`IL-6`)
 hist(log(merged_table$`IL-6`),
-     main = 'Histogram of Il-6 outliers',
+     main = 'Histogram of Il-6 distribution',
      xlab = 'log(IL-6)',
      col = 'blue',
      border = 'green',
@@ -121,7 +121,7 @@ hist(log(merged_table$`IL-6`),
 
 D <- outliers(merged_table$`GFR`)
 hist(log(merged_table$`GFR`),
-     main = 'Histogram of GFR outliers',
+     main = 'Histogram of GFR distribution',
      xlab = 'log(GFR)',
      col = 'blue',
      border = 'green',
@@ -129,7 +129,7 @@ hist(log(merged_table$`GFR`),
 
 E <- outliers(merged_table$`Cystatin C`)
 hist(log(merged_table$`Cystatin C`),
-     main = 'Histogram of Cystatin C outliers',
+     main = 'Histogram of Cystatin C distribution',
      xlab = 'log(Cystatin C)',
      col = 'blue',
      border = 'green',
@@ -137,7 +137,7 @@ hist(log(merged_table$`Cystatin C`),
 
 F <- outliers(merged_table$`age`)
 hist(log(merged_table$`age`),
-     main = 'Histogram of Age outliers',
+     main = 'Histogram of Age distribution',
      xlab = 'log(age)',
      col = 'blue',
      border = 'green',
