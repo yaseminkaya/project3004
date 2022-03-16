@@ -11,7 +11,6 @@ hosp <- read.csv(paste0(datafolder, "BBS3004_hospitalisations.csv"), header = TR
 lab <- read.csv(paste0(datafolder, "BBS3004_labvalues.csv"), header = TRUE)
 visits <- read.csv(paste0(datafolder, "BBS3004_visits.csv"), header = TRUE)
 
-
 #Invert the table of labvalues #pivot_wider
 .libPaths("C:/Users/Punkt/Downloads/R/RStudio")
 
@@ -273,7 +272,11 @@ roc_obj <- roc(test$label, as.integer(test_pred))
 plot(roc_obj)
 auc(roc_obj)
 
+#descriptives
 
+boxplot(age~gender, data = merged_table, main = 'Age per gender',
+        xlab = 'Gender',
+        ylab = 'Ages')
 
 
 
