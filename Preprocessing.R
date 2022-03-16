@@ -128,7 +128,8 @@ hist(log(merged_table$`CRP sensitive`),
 # x-axis label is log(IL-6)
 # y-axis label is frequency as default
 # colour of the bar is blue and of the border is green
-# las is 1 changes the orientation of the label valuesC <- outliers(merged_table$`IL-6`)
+# las is 1 changes the orientation of the label values
+C <- outliers(merged_table$`IL-6`)
 hist(log(merged_table$`IL-6`),
      main = 'Histogram of Il-6 distribution',
      xlab = 'log(IL-6)',
