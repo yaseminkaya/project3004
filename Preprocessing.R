@@ -99,10 +99,12 @@ hist(log(merged_table$`NT-BNP`))
 
 
 #Update age of the patient
+#Date after diagnosis -> days after diagnosis
 
-merged_table$data_diff<-difftime(as.Date(merged_table$date), as.Date(merged_table$date_of_diagnosis), units = "days")
-merged_table$age <- as.integer(merged_table$age + (merged_table$data_diff/365))
-merged_table = merged_table[,!grepl("^data_diff",names(merged_table))]
+merged_table$days_after_diagnosis<-difftime(as.Date(merged_table$date), as.Date(merged_table$date_of_diagnosis), units = "days")
+merged_table$age <- as.integer(merged_table$age + (merged_table$days_after_diagnosis/365))
+merged_table$days_after_diagnosis <- as.integer(merged_table$days_after_diagnosis)
+merged_table = merged_table[,!grepl("^date_of_diagnosis",names(merged_table))]
 
 
 #Imputation of missing values - MICE
@@ -139,7 +141,7 @@ names(merged_table)[10] <- 'B4'
 names(merged_table)[11] <- 'B5'
 
 #| remove columns labels and make temporary merge file for imputation
-temp_merged <- merged_table[-16]
+temp_merged <- merged_table[-15]
 
 #Imputation 
 imputed_data <- mice(temp_merged, m=5, method = "rf")
@@ -147,18 +149,20 @@ summary(imputed_data)
 imputed_merged_table <- complete(imputed_data, 1)
 #Here I used random forest, maxit and m is on default and I chose model 1. However when we have an actual model we can play around with these and see what results in the best model.
 
+#| Remove id and date of visit
+imputed_merged_table <- imputed_merged_table[-c(1:2)]
 
-#PCA
+#PCA & Split
 
 library(caret)
 preProc <- preProcess(imputed_merged_table,method="pca",pcaComp=3)
 trainPCA <- predict(preProc, imputed_merged_table)
 
-
-#SVM
+#| No PCA, better AUC spec = 0
+#trainPCA <- imputed_merged_table
 
 set.seed(2308)
-trainPCA <- trainPCA[-c(1:2,9)]
+
 trainPCA$label <- as.factor(merged_table$label)
 intrain <- createDataPartition(y = trainPCA$label, p= 0.8, list = FALSE)
 train <- trainPCA[intrain,]
@@ -170,16 +174,50 @@ train <- train  %>%
                         labels = make.names(levels(label))))
 
 train_control <- trainControl(method="cv", number=5, classProbs = TRUE, summaryFunction = twoClassSummary)
-svm_Linear <- train(label ~., data = train, method = "svmLinear",
-                    trControl=train_control,
-                    metric = "ROC")
-svm_Linear
 
 test <- test  %>% 
   mutate(label = factor(label, 
                         labels = make.names(levels(label))))
 
+
+#SVM
+
+svm_Linear <- train(label ~., data = train, method = "svmLinear",
+                    trControl=train_control,
+                    metric = "ROC")
+svm_Linear
+
 test_pred <- predict(svm_Linear, newdata = test)
+
+
+#RF
+
+RF <- train(label ~., data = train, method = "rf",
+                    trControl=train_control,
+                    metric = "ROC")
+
+RF
+
+test_pred <- predict(RF, newdata = test)
+
+
+#CART
+
+install.packages("rpart")
+library(rpart)
+CART <- rpart(label ~., data = train, method = "class",
+            trControl=train_control,
+            metric = "ROC")
+
+CART
+
+par(xpd = NA)
+plot(CART)
+text(CART, digits = 3)
+
+test_pred <- CART %>% 
+  predict(test, type = "class")
+
 
 #AUC
 
@@ -188,17 +226,6 @@ library(pROC)
 roc_obj <- roc(test$label, as.integer(test_pred))
 plot(roc_obj)
 auc(roc_obj)
-
-
-
-
-
-
-
-
-
-
-
 
 
 
