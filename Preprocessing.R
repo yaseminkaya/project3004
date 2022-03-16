@@ -303,6 +303,36 @@ test_pred <- predict(CART, newdata = test, type = "prob")
 
 plot(varImp(CART, scale = TRUE))
 
+#knn -> AUC is 65%
+knn <- train(label ~., data = train, method = "knn",
+            trControl=train_control,
+            metric = "ROC")
+
+test_pred <- predict(knn, newdata = test, type = "prob")
+
+#bayesian network -> STILL DOES NOT WORK, something to do with version i dont know how to solve
+
+#install.packages("BiocManager")
+library("BiocManager")
+library("caret")
+
+bn <- train(label ~., data = train, method = "vbmpRadial",
+             trControl=train_control,
+             metric = "ROC")
+
+test_pred <- predict(bn, newdata = test, type = "prob")
+
+#artificial neural network -> AUC is 64%
+
+library("caret")
+ann <- train(label ~., data = train, method = "nnet",
+            trControl=train_control,
+            metric = "ROC")
+
+plot(ann)
+
+test_pred <- predict(ann, newdata = test, type = "prob")
+
 
 #AUC with CI
 
@@ -316,6 +346,10 @@ roc_obj = plot.roc(test$label, test_pred$X1,
                    print.auc = TRUE)
 
 
+#calibration curve --> gives the same error
+install.packages("classifierplots")
+library("classifierplots")
+calibration_curve <- calibration_plot(data = test, obs = "label", pred = "pred")
 
 #Scaling, centering in train function for B especially
 #Look into imputation
