@@ -94,6 +94,13 @@ outliers <- function(x) {
   return(outliers)
 }
 
+# Create a histogram for NT-BNP distribution to check for outliers
+# Title is 'Histogram of NT-BNP distribution'
+# x-axis label is log(NT-BNP)
+# y-axis label is frequency as default
+# colour of the bar is green and of the border is blue
+# las is 1 changes the orientation of the label values
+
 A <- outliers(merged_table$`NT-BNP`)
 hist(log(merged_table$`NT-BNP`), 
      main = 'Histogram of NT-BNP distribution',
@@ -102,6 +109,12 @@ hist(log(merged_table$`NT-BNP`),
      border = 'blue',
      las = 1)
 
+# Create a histogram for CRP sensitive distribution to check for outliers
+# Title is 'Histogram of CRP sensitive distribution'
+# x-axis label is log(CRP sensitive)
+# y-axis label is frequency as default
+# colour of the bar is blue and of the border is green
+# las is 1 changes the orientation of the label values
 B <- outliers(merged_table$`CRP sensitive`)
 hist(log(merged_table$`CRP sensitive`),
      main = 'Histogram of CRP sensitive distribution',
@@ -110,7 +123,12 @@ hist(log(merged_table$`CRP sensitive`),
      border = 'green',
      las = 1)
 
-C <- outliers(merged_table$`IL-6`)
+# Create a histogram for IL-6 distribution to check for outliers
+# Title is 'Histogram of IL-6 distribution'
+# x-axis label is log(IL-6)
+# y-axis label is frequency as default
+# colour of the bar is blue and of the border is green
+# las is 1 changes the orientation of the label valuesC <- outliers(merged_table$`IL-6`)
 hist(log(merged_table$`IL-6`),
      main = 'Histogram of Il-6 distribution',
      xlab = 'log(IL-6)',
@@ -118,6 +136,12 @@ hist(log(merged_table$`IL-6`),
      border = 'green',
      las = 1)
 
+# Create a histogram for GFR distribution to check for outliers
+# Title is 'Histogram of GFR distribution'
+# x-axis label is log(GFR)
+# y-axis label is frequency as default
+# colour of the bar is blue and of the border is green
+# las is 1 changes the orientation of the label values
 D <- outliers(merged_table$`GFR`)
 hist(log(merged_table$`GFR`),
      main = 'Histogram of GFR distribution',
@@ -126,6 +150,12 @@ hist(log(merged_table$`GFR`),
      border = 'green',
      las = 1)
 
+# Create a histogram for Cystatin C distribution to check for outliers
+# Title is 'Histogram of Cystatin C distribution'
+# x-axis label is log(Cystatin C)
+# y-axis label is frequency as default
+# colour of the bar is blue and of the border is green
+# las is 1 changes the orientation of the label values
 E <- outliers(merged_table$`Cystatin C`)
 hist(log(merged_table$`Cystatin C`),
      main = 'Histogram of Cystatin C distribution',
@@ -134,6 +164,12 @@ hist(log(merged_table$`Cystatin C`),
      border = 'green',
      las = 1)
 
+# Create a histogram for age distribution to check for outliers
+# Title is 'Histogram of age distribution'
+# x-axis label is log(age)
+# y-axis label is frequency as default
+# colour of the bar is blue and of the border is green
+# las is 1 changes the orientation of the label values
 F <- outliers(merged_table$`age`)
 hist(log(merged_table$`age`),
      main = 'Histogram of Age distribution',
