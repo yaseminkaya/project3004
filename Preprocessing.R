@@ -336,5 +336,22 @@ boxplot(age~gender, data = merged_table, main = 'Boxplot of the average age per 
         xlab = 'Gender',
         ylab = 'Age',
         col= colours,
+        border = 'green',
+        las = 1)
+
+# Create a boxplot that displays the average age per death status
+# colours is equal to the first replicate colour green and the second replicate colour red
+colours = c(rep("green",1), rep("red", 1)) 
+
+# boxplot with the title 'Boxplot of the average age per death status after 60 days
+# x-axis label is 'death'
+# y-axis label is 'age'
+# col is equal to colours
+# las is 1 changes the orientation of the label values
+boxplot(age~label, data = merged_table, main = 'Boxplot of the average age per death status',
+        xlab = 'Death',
+        ylab = 'Age',
+        col= colours,
+        border = 'blue',
         las = 1)
 
