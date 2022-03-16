@@ -285,9 +285,16 @@ roc_obj = plot.roc(test$label, test_pred$X1,
 
 
 
-#descriptives
+# Descriptives
+# Create a boxplot that displays the average age per gender group
+# colours is equal to the first replicate colour pink and the second replicate colour blue
+colours = c(rep("pink",1), rep("blue", 1)) 
 
-colours = c(rep("pink",1), rep("blue", 1))
+# boxplot with the title 'Boxplot of the average age per gender group
+# x-axis label is 'gender'
+# y-axis label is 'age'
+# col is equal to colours
+# las is 1 changes the orientation of the label values
 boxplot(age~gender, data = merged_table, main = 'Boxplot of the average age per gender',
         xlab = 'Gender',
         ylab = 'Age',
