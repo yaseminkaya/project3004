@@ -1,8 +1,13 @@
 #Load data
 
 #datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
+<<<<<<< HEAD
 #datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
 datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
+=======
+datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
+#datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
+>>>>>>> 9e320cd6251bdd32ef453811af35523f028ab35d
 #datafolder <- "C:/UM/BBS3004 The Core of Biomedical Sciences/Data/"
 
 deaths <- read.csv(paste0(datafolder, "BBS3004_deaths.csv"), header = TRUE)
@@ -239,11 +244,11 @@ imputed_merged_table <- imputed_merged_table[-c(1:2)]
 #PCA & Split
 
 library(caret)
-preProc <- preProcess(imputed_merged_table,method="pca",pcaComp=3)
-trainPCA <- predict(preProc, imputed_merged_table)
+#preProc <- preProcess(imputed_merged_table,method="pca",pcaComp=3)
+#trainPCA <- predict(preProc, imputed_merged_table)
 
 #| No PCA, better AUC spec = 0
-#trainPCA <- imputed_merged_table
+trainPCA <- imputed_merged_table
 
 set.seed(2308)
 
@@ -268,7 +273,8 @@ test <- test  %>%
 
 svm_Linear <- train(label ~., data = train, method = "svmLinear",
                     trControl=train_control,
-                    metric = "ROC")
+                    metric = "ROC",
+                    preProcess = c("center","scale"))
 svm_Linear
 
 test_pred <- predict(svm_Linear, newdata = test, type = "prob")
@@ -318,6 +324,18 @@ roc_obj = plot.roc(test$label, test_pred$X1,
                    print.auc = TRUE)
 
 
+<<<<<<< HEAD
+=======
+
+#Scaling, centering in train function for B especially
+#Look into imputation
+#Maybe make categorical variables into integers
+#Balancing of classes?
+
+
+
+
+>>>>>>> 9e320cd6251bdd32ef453811af35523f028ab35d
 # Descriptives
 # Create a boxplot that displays the average age per gender group
 # colours is equal to the first replicate colour pink and the second replicate colour blue
