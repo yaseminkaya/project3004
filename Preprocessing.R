@@ -1,8 +1,9 @@
 #Load data
 
 #datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
-datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
+#datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
 #datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
+datafolder <- "C:/UM/BBS3004 The Core of Biomedical Sciences/Data/"
 
 deaths <- read.csv(paste0(datafolder, "BBS3004_deaths.csv"), header = TRUE)
 demo <- read.csv(paste0(datafolder, "BBS3004_demographics.csv"), header = TRUE)
@@ -95,8 +96,52 @@ outliers <- function(x) {
 }
 
 A <- outliers(merged_table$`NT-BNP`)
-hist(log(merged_table$`NT-BNP`))
+hist(log(merged_table$`NT-BNP`), 
+     main = 'Histogram of NT-BNP outliers',
+     xlab = 'log(NT-BNP)',
+     col = 'green',
+     border = 'blue',
+     las = 1)
 
+B <- outliers(merged_table$`CRP sensitive`)
+hist(log(merged_table$`CRP sensitive`),
+     main = 'Histogram of CRP sensitive outliers',
+     xlab = 'log(CRP sensitive)',
+     col = 'blue',
+     border = 'green',
+     las = 1)
+
+C <- outliers(merged_table$`IL-6`)
+hist(log(merged_table$`IL-6`),
+     main = 'Histogram of Il-6 outliers',
+     xlab = 'log(IL-6)',
+     col = 'blue',
+     border = 'green',
+     las = 1)
+
+D <- outliers(merged_table$`GFR`)
+hist(log(merged_table$`GFR`),
+     main = 'Histogram of GFR outliers',
+     xlab = 'log(GFR)',
+     col = 'blue',
+     border = 'green',
+     las = 1)
+
+E <- outliers(merged_table$`Cystatin C`)
+hist(log(merged_table$`Cystatin C`),
+     main = 'Histogram of Cystatin C outliers',
+     xlab = 'log(Cystatin C)',
+     col = 'blue',
+     border = 'green',
+     las = 1)
+
+F <- outliers(merged_table$`age`)
+hist(log(merged_table$`age`),
+     main = 'Histogram of Age outliers',
+     xlab = 'log(age)',
+     col = 'blue',
+     border = 'green',
+     las = 1)
 
 #Update age of the patient
 #Date after diagnosis -> days after diagnosis
