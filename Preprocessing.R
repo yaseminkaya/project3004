@@ -1,13 +1,10 @@
 #Load data
 
 #datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
-<<<<<<< HEAD
 #datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
-datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
-=======
+#datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
 datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
 #datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
->>>>>>> 9e320cd6251bdd32ef453811af35523f028ab35d
 #datafolder <- "C:/UM/BBS3004 The Core of Biomedical Sciences/Data/"
 
 deaths <- read.csv(paste0(datafolder, "BBS3004_deaths.csv"), header = TRUE)
@@ -324,8 +321,6 @@ roc_obj = plot.roc(test$label, test_pred$X1,
                    print.auc = TRUE)
 
 
-<<<<<<< HEAD
-=======
 
 #Scaling, centering in train function for B especially
 #Look into imputation
@@ -335,7 +330,6 @@ roc_obj = plot.roc(test$label, test_pred$X1,
 
 
 
->>>>>>> 9e320cd6251bdd32ef453811af35523f028ab35d
 # Descriptives
 # Create a boxplot that displays the average age per gender group
 # colours is equal to the first replicate colour pink and the second replicate colour blue
