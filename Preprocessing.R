@@ -250,9 +250,15 @@ trainPCA <- imputed_merged_table
 set.seed(2308)
 
 trainPCA$label <- as.factor(merged_table$Label)
-intrain <- createDataPartition(y = trainPCA$label, p= 0.8, list = FALSE)
-train <- trainPCA[intrain,]
-test <- trainPCA[-intrain,]
+
+#install.packages("ROSE")
+library(ROSE)
+under <- ovun.sample(label~., data=trainPCA, method = "both", N=nrow(trainPCA))$data
+table(under$label)
+
+intrain <- createDataPartition(y = under$label, p= 0.8, list = FALSE)
+train <- under[intrain,]
+test <- under[-intrain,]
 
 library(dplyr)
 train <- train  %>% 
