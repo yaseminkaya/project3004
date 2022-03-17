@@ -249,7 +249,7 @@ trainPCA <- imputed_merged_table
 
 set.seed(2308)
 
-trainPCA$label <- as.factor(merged_table$label)
+trainPCA$label <- as.factor(merged_table$Label)
 intrain <- createDataPartition(y = trainPCA$label, p= 0.8, list = FALSE)
 train <- trainPCA[intrain,]
 test <- trainPCA[-intrain,]
@@ -319,6 +319,13 @@ roc_obj = plot.roc(test$label, test_pred$X1,
                    percent = TRUE,
                    ci = TRUE,
                    print.auc = TRUE)
+
+install.packages("PredictABEL")
+library(PredictABEL)
+cOutcome <- 14
+test_pred$X0 <- as.integer(test_pred$X0)
+plotCalibration(data=test, cOutcome=cOutcome, predRisk=test_pred$X0, 
+                groups=10, rangeaxis=c(0,1))
 
 
 
