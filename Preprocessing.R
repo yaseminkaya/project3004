@@ -3,9 +3,9 @@
 #datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
 #datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
 #datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
-#datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
+datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
 #datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
-datafolder <- "C:/UM/BBS3004 The Core of Biomedical Sciences/Data/"
+#datafolder <- "C:/UM/BBS3004 The Core of Biomedical Sciences/Data/"
 
 deaths <- read.csv(paste0(datafolder, "BBS3004_deaths.csv"), header = TRUE)
 demo <- read.csv(paste0(datafolder, "BBS3004_demographics.csv"), header = TRUE)
@@ -29,9 +29,6 @@ merged_table <- data.frame()
 merged_table <- merge(x = visits, y = lab_inv)
 merged_table <- merge(x = merged_table, y = demo, by = "id")
 
-#| summary missing values 
-colSums(is.na(merged_table))
-#| what kind how percentage from total
 
 #hospitalization within 60
 
@@ -84,113 +81,6 @@ merged_table = merged_table[,!grepl("hosp$",names(merged_table))]
 merged_table = merged_table[,!grepl("death$",names(merged_table))]
 
 
-#Outliers IQR for numerical predictors
-#No outliers for Age and Biomarkers, except NT-BNP (93 observations)
-#outliers in NT.BNP --> not normally distributed
-
-outliers <- function(x) {
-  
-  Q1 <- quantile(x, .25)
-  Q3 <- quantile(x, .75)
-  IQR <- IQR(x)
-  
-  outliers <- subset(merged_table, x < (Q1 - 1.5*IQR) | x > (Q3 + 1.5*IQR))
-  
-  return(outliers)
-}
-
-# Code block for plotting histograms
-### Histogram to check for outliers ###
-{
-  
-  # Create a histogram for NT-BNP distribution to check for outliers
-  # Title is 'Histogram of NT-BNP distribution'
-  # x-axis label is log(NT-BNP)
-  # y-axis label is frequency as default
-  # colour of the bar is green and of the border is blue
-  # las is 1 changes the orientation of the label values
-  
-  A <- outliers(merged_table$"NT-BNP")
-  hist(log(merged_table$"NT-BNP"), 
-       main = 'Histogram of NT-BNP distribution',
-       xlab = 'log(NT-BNP)',
-       col = 'green',
-       border = 'blue',
-       las = 1)
-  
-  # Create a histogram for CRP sensitive distribution to check for outliers
-  # Title is 'Histogram of CRP sensitive distribution'
-  # x-axis label is log(CRP sensitive)
-  # y-axis label is frequency as default
-  # colour of the bar is blue and of the border is green
-  # las is 1 changes the orientation of the label values
-  B <- outliers(merged_table$"CRP sensitive")
-  hist(log(merged_table$"CRP sensitive"),
-       main = 'Histogram of CRP sensitive distribution',
-       xlab = 'log(CRP sensitive)',
-       col = 'blue',
-       border = 'green',
-       las = 1)
-  
-  # Create a histogram for IL-6 distribution to check for outliers
-  # Title is 'Histogram of IL-6 distribution'
-  # x-axis label is log(IL-6)
-  # y-axis label is frequency as default
-  # colour of the bar is blue and of the border is green
-  # las is 1 changes the orientation of the label values
-  C <- outliers(merged_table$"IL-6")
-  hist(log(merged_table$"IL-6"),
-       main = 'Histogram of Il-6 distribution',
-       xlab = 'log(IL-6)',
-       col = 'blue',
-       border = 'green',
-       las = 1)
-  
-  # Create a histogram for GFR distribution to check for outliers
-  # Title is 'Histogram of GFR distribution'
-  # x-axis label is log(GFR)
-  # y-axis label is frequency as default
-  # colour of the bar is blue and of the border is green
-  # las is 1 changes the orientation of the label values
-  D <- outliers(merged_table$"GFR")
-  hist(log(merged_table$"GFR"),
-       main = 'Histogram of GFR distribution',
-       xlab = 'log(GFR)',
-       col = 'blue',
-       border = 'green',
-       las = 1)
-  
-  # Create a histogram for Cystatin C distribution to check for outliers
-  # Title is 'Histogram of Cystatin C distribution'
-  # x-axis label is log(Cystatin C)
-  # y-axis label is frequency as default
-  # colour of the bar is blue and of the border is green
-  # las is 1 changes the orientation of the label values
-  E <- outliers(merged_table$"Cystatin C")
-  hist(log(merged_table$"Cystatin C"),
-       main = 'Histogram of Cystatin C distribution',
-       xlab = 'log(Cystatin C)',
-       col = 'blue',
-       border = 'green',
-       las = 1)
-  
-  # Create a histogram for age distribution to check for outliers
-  # Title is 'Histogram of age distribution'
-  # x-axis label is log(age)
-  # y-axis label is frequency as default
-  # colour of the bar is blue and of the border is green
-  # las is 1 changes the orientation of the label values
-  F <- outliers(merged_table$"age")
-  hist(log(merged_table$"age"),
-       main = 'Histogram of Age distribution',
-       xlab = 'log(age)',
-       col = 'blue',
-       border = 'green',
-       las = 1)
-       
-       } 
-
-
 #Update age of the patient
 #Date after diagnosis -> days after diagnosis
 
@@ -219,7 +109,6 @@ aggr_plot <- aggr(merged_table, col=c('navyblue','red'), numbers=TRUE, sortVars=
                   labels=names(data), cex.axis=.7, gap=3, 
                   ylab=c("Histogram of missing data","Pattern"))
 
-
 #Necessary columns as factor, can also be already done in earlier part of code
 merged_table$orthopnea <- as.factor(merged_table$orthopnea)
 merged_table$oedema <- as.factor(merged_table$oedema)
@@ -227,11 +116,11 @@ merged_table$cough <- as.factor(merged_table$cough)
 merged_table$rales <- as.factor(merged_table$rales)
 
 #| rename columns because of the spaces
-names(merged_table)[7] <- 'B1'
-names(merged_table)[8] <- 'B2'
-names(merged_table)[9] <- 'B3'
-names(merged_table)[10] <- 'B4'
-names(merged_table)[11] <- 'B5'
+names(merged_table)[7] <- 'NT_BNP'
+names(merged_table)[8] <- 'CRP_sensitive'
+names(merged_table)[9] <- 'IL_6'
+names(merged_table)[10] <- 'GFR'
+names(merged_table)[11] <- 'Cystatin_C'
 
 #| remove columns labels and make temporary merge file for imputation
 temp_merged <- merged_table[-15]
@@ -252,21 +141,13 @@ library(caret)
 #trainPCA <- predict(preProc, imputed_merged_table)
 
 #| No PCA, better AUC spec = 0
-trainPCA <- imputed_merged_table
-
 set.seed(2308)
 
-trainPCA$label <- as.factor(merged_table$Label)
-under<-trainPCA
+imputed_merged_table$label <- as.factor(merged_table$Label)
 
-#install.packages("ROSE")
-
-
-#table(under$label)
-
-intrain <- createDataPartition(y = under$label, p= 0.8, list = FALSE)
-train <- under[intrain,]
-test <- under[-intrain,]
+intrain <- createDataPartition(y = imputed_merged_table$label, p= 0.8, list = FALSE)
+train <- imputed_merged_table[intrain,]
+test <- imputed_merged_table[-intrain,]
 
 library(ROSE)
 train <- ovun.sample(label~., data=train, method = "both", N=nrow(train))$data
@@ -283,197 +164,102 @@ test <- test  %>%
                         labels = make.names(levels(label))))
 
 
-#SVM
+#Classifiers
 
-svm_Linear <- train(label ~., data = train, method = "svmLinear",
-                    trControl=train_control,
-                    metric = "ROC",
-                    preProcess = c("center","scale"))
-svm_Linear
-
-test_pred <- predict(svm_Linear, newdata = test, type = "prob") 
-
-
-#RF
-
-RF <- train(label ~., data = train, method = "rf",
-                    trControl=train_control,
-                    metric = "ROC")
-
-RF
-
-plot(RF)
-
-test_pred <- predict(RF, newdata = test, type = "prob")
-
-plot(varImp(RF, scale = TRUE))
-
-
-#CART
-
-#install.packages("rpart")
-library(rpart)
-CART <- train(label ~., data = train, method = "rpart",
-            trControl=train_control,
-            metric = "ROC")
-
-CART
-
-plot(CART)
-
-test_pred <- predict(CART, newdata = test, type = "prob")
-
-plot(varImp(CART, scale = TRUE))
-
-#knn -> AUC is 65%
-knn <- train(label ~., data = train, method = "knn",
-            trControl=train_control,
-            metric = "ROC")
-
-test_pred <- predict(knn, newdata = test, type = "prob")
-
-#bayesian network -> STILL DOES NOT WORK, something to do with version i dont know how to solve
-
-#install.packages("BiocManager")
-library("BiocManager")
-library("caret")
-
-bn <- train(label ~., data = train, method = "vbmpRadial",
-             trControl=train_control,
-             metric = "ROC")
-
-test_pred <- predict(bn, newdata = test, type = "prob")
-
-#artificial neural network -> AUC is 64%
-
-library("caret")
-ann <- train(label ~., data = train, method = "nnet",
-            trControl=train_control,
-            metric = "ROC")
-
-plot(ann)
-
-test_pred <- predict(ann, newdata = test, type = "prob")
-
-
-#AUC with CI
-
-#install.packages("pROC")
-library(pROC)
-
-roc_obj = plot.roc(test$label, test_pred$X1,
-                   main = "ROC curve",
-                   percent = TRUE,
-                   ci = TRUE,
-                   print.auc = TRUE)
-
-#install.packages("PredictABEL")
-library(PredictABEL)
-cOutcome <- 14
-plotCalibration(data=test, cOutcome=cOutcome, predRisk=test_pred$X0, 
-                groups=10, rangeaxis=c(0,1))
-
-
-#calibration curve --> gives the same error
-#install.packages("classifierplots")
-library("classifierplots")
-calibration_curve <- calibration_plot(data = test, obs = "label", pred = "pred")
-
-#Scaling, centering in train function for B especially
-#Look into imputation
-#Maybe make categorical variables into integers
-#Balancing of classes?
-
-
-
-
-# Descriptives
-
-{
-  # Create a boxplot that displays the average age per gender group
-  # colours is equal to the first replicate colour pink and the second replicate colour blue
-  colours = c(rep("pink",1), rep("blue", 1)) 
-  
-  # boxplot with the title 'Boxplot of the average age per gender group
-  # x-axis label is 'gender'
-  # y-axis label is 'age'
-  # col is equal to colours
-  # las is 1 changes the orientation of the label values
-  boxplot(age~gender, data = merged_table, main = 'Boxplot of the average age per gender',
-          xlab = 'Gender',
-          ylab = 'Age',
-          col= colours,
-          border = 'green',
-          las = 1)
-  
-  # Create a boxplot that displays the average age per death status
-  # colours is equal to the first replicate colour green and the second replicate colour red
-  colours = c(rep("green",1), rep("red", 1)) 
-  
-  # boxplot with the title 'Boxplot of the average age per death status after 60 days
-  # x-axis label is 'death'
-  # y-axis label is 'age'
-  # col is equal to colours
-  # las is 1 changes the orientation of the label values
-  boxplot(age~label, data = merged_table, main = 'Boxplot of the average age per death status',
-          xlab = 'Death',
-          ylab = 'Age',
-          col= colours,
-          border = 'blue',
-          las = 1)
+train_model <- function(x) {
+  model <- train(label ~., data = train, method = x,
+                 trControl=train_control,
+                 metric = "ROC",
+                 preProcess = c("center","scale"))
+  return(model)
 }
 
-#data cleaning missing values
-# add group percentages 
-#| percentages 0 and 1 so 0 no worsening in HF and 1 hospitalization or death
+predict_model <- function(x) {
+  test_pred <- predict(x, newdata = test, type = "prob")
+  return(test_pred)
+}
 
-library(ggplot2)
+library(classifierplots)
+calibration <- function(x) {
+  calibration_plot(ifelse(test$label == 'X1', 1,0), x$X1) 
+}
+
+ROC_AUC <- function (x) {
+  classifierplots::roc_plot(ifelse(test$label == 'X1', 1,0), x$X1)
+}
+
+#|Logistic Regression
+LR<-train_model("glm")
+test_LR<-predict_model(LR)
+calibration(test_LR)
+ROC_AUC(test_LR)
+
+#|SVM
+svmLinear<-train_model("svmLinear")
+test_svmLinear<-predict_model(svmLinear)
+calibration(test_svmLinear)
+ROC_AUC(test_svmLinear)
+
+#|RF
+RF<-train_model("rf")
+test_RF<-predict_model(RF)
+calibration(test_RF)
+ROC_AUC(test_RF)
+plot(varImp(RF, scale = TRUE))
+plot(RF)
+
+#|CART
+library(rpart)
+CART<-train_model("rpart")
+test_CART<-predict_model(CART)
+calibration(test_CART)
+ROC_AUC(test_CART)
+
+#|kNN
+kNN<-train_model("knn")
+test_kNN<-predict_model(kNN)
+calibration(test_kNN)
+ROC_AUC(test_kNN)
+
+#|ANN
+ANN<-train_model("nnet")
+test_ANN<-predict_model(ANN)
+calibration(test_ANN)
+ROC_AUC(test_ANN)
+
+#|NB
+NB<-train_model("nb")
+test_NB<-predict_model(NB)
+calibration(test_NB)
+ROC_AUC(test_NB)
 
 
-ggplot(merged_table, aes(x = as.factor(gender), y = ..prop.., group = label, fill = factor(label) )) +
-  geom_bar(position = "dodge") +
-  geom_text(aes(label = scales::percent(..prop..)), 
-            position = position_dodge(width = 0.9), stat = "count", vjust = 2) +
-  labs(x = NULL, y = NULL) +
-  guides(fill = guide_legend(title = "sex")) +                        
-  scale_y_continuous(labels = scales::percent_format())   +              
-  scale_fill_manual(values=c("#b6181f", "#f6b8bb")) +
-  scale_x_discrete(labels = labs)
 
-#trying to get the yaxis from percentage to count.
-#error : on't know how to automatically pick scale for object of type function. Defaulting to continuous
-#present do not yet know to solve
 
-# p1<- ggplot(data=merged_table)
-# p1<- p1+ geom_bar(aes(x = label))
-# p1<- p1+ theme_minimal()
-# 
-# library(scales)
-# p1<- ggplot(data = merged_table)
-# p1<- p1+ geom_bar(aes(x= Label, y=after_stat(count/sum(count))))
-# p1<- p1 + theme_classic()
-# p1<- p1+ scale_y_continuous(labels= percent)
-# p1
-# 
-# p1<- ggplot(data = merged_table)
-# p1<- p1+ geom_bar(aes(x= label, y=(..count../sum(..count..))))
-# p1<- p1 + theme_classic()
-# p1<- p1+ scale_y_continuous(labels= percent)
-# p1
-# 
-# # Convert labelled vector to a factor
-# 
-# mpgCount <- merged_table%>%
-#   dplyr::count(Label)%>%
-#   dplyr::mutate(perc = n/sum(n) * 100)
-# 
-# pl <- ggplot (data = merged_table, aes(x = Label, y = n, fill = class))
-# pl <- pl + geom_col()
-# pl <- pl + geom_text(aes(x = Label, y = n
-#                          , label = paste0(n, " (", round(perc,1),"%)")
-#                          , vjust = -0.5
-#                          
-# ))
-# pl <- pl + theme_classic()
-# pl <- pl + labs(title ="Bar chart showing count and percentage")
-# pl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
