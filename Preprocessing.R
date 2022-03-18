@@ -250,15 +250,19 @@ trainPCA <- imputed_merged_table
 set.seed(2308)
 
 trainPCA$label <- as.factor(merged_table$Label)
+under<-trainPCA
 
 #install.packages("ROSE")
-library(ROSE)
-under <- ovun.sample(label~., data=trainPCA, method = "both", N=nrow(trainPCA))$data
-table(under$label)
+
+
+#table(under$label)
 
 intrain <- createDataPartition(y = under$label, p= 0.8, list = FALSE)
 train <- under[intrain,]
 test <- under[-intrain,]
+
+library(ROSE)
+train <- ovun.sample(label~., data=train, method = "both", N=nrow(train))$data
 
 library(dplyr)
 train <- train  %>% 
@@ -280,7 +284,7 @@ svm_Linear <- train(label ~., data = train, method = "svmLinear",
                     preProcess = c("center","scale"))
 svm_Linear
 
-test_pred <- predict(svm_Linear, newdata = test, type = "prob")
+test_pred <- predict(svm_Linear, newdata = test, type = "prob") 
 
 
 #RF
@@ -356,16 +360,15 @@ roc_obj = plot.roc(test$label, test_pred$X1,
                    ci = TRUE,
                    print.auc = TRUE)
 
-install.packages("PredictABEL")
+#install.packages("PredictABEL")
 library(PredictABEL)
 cOutcome <- 14
-test_pred$X0 <- as.integer(test_pred$X0)
 plotCalibration(data=test, cOutcome=cOutcome, predRisk=test_pred$X0, 
                 groups=10, rangeaxis=c(0,1))
 
 
 #calibration curve --> gives the same error
-install.packages("classifierplots")
+#install.packages("classifierplots")
 library("classifierplots")
 calibration_curve <- calibration_plot(data = test, obs = "label", pred = "pred")
 
