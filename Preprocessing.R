@@ -96,18 +96,18 @@ merged_table = merged_table[,!grepl("^date_of_diagnosis",names(merged_table))]
 #install.packages("VIM")
 #install.packages("Rcpp")
 library("mice")
-library("VIM")
-library("Rcpp")
+#library("VIM")
+#library("Rcpp")
 
 
 #Visualize what is missing
-pMiss <- function(x){sum(is.na(x))/length(x)*100}
-apply(merged_table,2,pMiss)
-apply(merged_table,1,pMiss)
-md.pattern(merged_table)
-aggr_plot <- aggr(merged_table, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE, 
-                  labels=names(data), cex.axis=.7, gap=3, 
-                  ylab=c("Histogram of missing data","Pattern"))
+#pMiss <- function(x){sum(is.na(x))/length(x)*100}
+#apply(merged_table,2,pMiss)
+#apply(merged_table,1,pMiss)
+#md.pattern(merged_table)
+#aggr_plot <- aggr(merged_table, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE, 
+                  #labels=names(data), cex.axis=.7, gap=3, 
+                  #ylab=c("Histogram of missing data","Pattern"))
 
 #Necessary columns as factor, can also be already done in earlier part of code
 merged_table$orthopnea <- as.factor(merged_table$orthopnea)
@@ -128,11 +128,11 @@ temp_merged <- merged_table[-15]
 #Imputation 
 imputed_data <- mice(temp_merged, m=5, method = "rf")
 summary(imputed_data)
-imputed_merged_table <- complete(imputed_data, 1)
+imputed_merged_table <- complete(imputed_data, "long")
 #Here I used random forest, maxit and m is on default and I chose model 1. However when we have an actual model we can play around with these and see what results in the best model.
 
 #| Remove id and date of visit
-imputed_merged_table <- imputed_merged_table[-c(1:2)]
+imputed_merged_table <- imputed_merged_table[-c(1:4)]
 
 #PCA & Split
 
@@ -141,13 +141,18 @@ library(caret)
 #trainPCA <- predict(preProc, imputed_merged_table)
 
 #| No PCA, better AUC spec = 0
-set.seed(2308)
 
 imputed_merged_table$label <- as.factor(merged_table$Label)
 
-intrain <- createDataPartition(y = imputed_merged_table$label, p= 0.8, list = FALSE)
-train <- imputed_merged_table[intrain,]
-test <- imputed_merged_table[-intrain,]
+train <- data_frame()
+test <- data_frame()
+for (i in seq(1, nrow(imputed_merged_table), by=5193)) {
+  q <- imputed_merged_table[ c(i:(i+5192)), ]
+  intrain <- 
+  train<-rbind(train, q[1:4154,])
+  test<-rbind(test, q[4155:5193,])
+  print(i)
+}
 
 library(ROSE)
 train <- ovun.sample(label~., data=train, method = "both", N=nrow(train))$data
