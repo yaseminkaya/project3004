@@ -1,6 +1,6 @@
 #Load data
 
-#datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
+datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
 #datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
 #datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
 datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
@@ -141,7 +141,7 @@ library(caret)
 #trainPCA <- predict(preProc, imputed_merged_table)
 
 #| No PCA, better AUC spec = 0
-
+library(dplyr)
 imputed_merged_table$label <- as.factor(merged_table$Label)
 
 train <- data_frame()
@@ -157,12 +157,20 @@ for (i in seq(1, nrow(imputed_merged_table), by=5193)) {
 library(ROSE)
 train <- ovun.sample(label~., data=train, method = "both", N=nrow(train))$data
 
-library(dplyr)
 train <- train  %>% 
   mutate(label = factor(label, 
                         labels = make.names(levels(label))))
 
-train_control <- trainControl(method="cv", number=5, classProbs = TRUE, summaryFunction = twoClassSummary)
+train_control <- trainControl(method="adaptive_cv", 
+                              number=5, repeats = 5, 
+                              adaptive = list (min=2, 
+                                               alpha=0.05, 
+                                               method="gls", 
+                                               complete= FALSE),
+                              classProbs = TRUE, 
+                              summaryFunction = twoClassSummary,
+                              verboseIter = TRUE)
+
 
 test <- test  %>% 
   mutate(label = factor(label, 
