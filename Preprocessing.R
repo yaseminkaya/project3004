@@ -160,6 +160,8 @@ imputed_data <- mice(train, m=5, method = "rf")
 summary(imputed_data)
 train <- complete(imputed_data, "long")
 
+#add labels back???
+
 #train 
 library(ROSE)
 train <- ovun.sample(label~., data=train, method = "both", N=nrow(train))$data
