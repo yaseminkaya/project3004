@@ -1,6 +1,6 @@
 #Load data
 
-#datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
+datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
 #datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
 #datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
 datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
@@ -126,10 +126,7 @@ names(merged_table)[11] <- 'Cystatin_C'
 temp_merged <- merged_table[-15]
 
 #| Remove id, date of visit and categorical variables
-temp_merged <- temp_merged[-c(1:6, 13:14)]
-
-#only remove id and date of visit, if we do want imputation
-#temp_merged<- temp_merged [-c(1:2)]
+#temp_merged <- temp_merged[-c(1:6, 13:14)]
 
 #PCA
 library(caret)
@@ -155,10 +152,13 @@ intrain <- createDataPartition(y = temp_merged$label, p= 0.8, list = FALSE)
 train <- temp_merged[intrain,]
 test <- temp_merged[-intrain,]
 
+#only remove id and date of visit, if we do want imputation
+train<- train [-c(1:2, 16)]
+
 #imputation
-#imputed_data <- mice(train, m=5, method = "rf")
-#summary(imputed_data)
-#train <- complete(imputed_data, "long")
+imputed_data <- mice(train, m=5, method = "rf")
+summary(imputed_data)
+train <- complete(imputed_data, "long")
 
 #train 
 library(ROSE)
