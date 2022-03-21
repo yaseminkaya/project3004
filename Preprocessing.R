@@ -73,7 +73,7 @@ for (a in 1:nrow(merged_table)) {
 #Death or hospitalization in 60 days
 
 for (a in 1:nrow(merged_table)) {
-  merged_table$Label[a] <- 
+  merged_table$label[a] <- 
     if (merged_table$label_hosp[a] == 1 || merged_table$label_death[a] == 1){
       1
     } else {0}}
@@ -89,26 +89,6 @@ merged_table$age <- as.integer(merged_table$age + (merged_table$days_after_diagn
 merged_table$days_after_diagnosis <- as.integer(merged_table$days_after_diagnosis)
 merged_table = merged_table[,!grepl("^date_of_diagnosis",names(merged_table))]
 
-
-#Imputation of missing values - MICE
-
-#install.packages("mice")
-#install.packages("VIM")
-#install.packages("Rcpp")
-library("mice")
-#library("VIM")
-#library("Rcpp")
-
-
-#Visualize what is missing
-#pMiss <- function(x){sum(is.na(x))/length(x)*100}
-#apply(merged_table,2,pMiss)
-#apply(merged_table,1,pMiss)
-#md.pattern(merged_table)
-#aggr_plot <- aggr(merged_table, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE, 
-#labels=names(data), cex.axis=.7, gap=3, 
-#ylab=c("Histogram of missing data","Pattern"))
-
 #Necessary columns as factor, can also be already done in earlier part of code
 merged_table$orthopnea <- as.factor(merged_table$orthopnea)
 merged_table$oedema <- as.factor(merged_table$oedema)
@@ -122,30 +102,12 @@ names(merged_table)[9] <- 'IL_6'
 names(merged_table)[10] <- 'GFR'
 names(merged_table)[11] <- 'Cystatin_C'
 
-#| remove columns labels and make temporary merge file for imputation
-temp_merged <- merged_table[-15]
-
-#| Remove id, date of visit and categorical variables
-#temp_merged <- temp_merged[-c(1:6, 13:14)]
-
-#PCA
 library(caret)
-#preProc <- preProcess(imputed_merged_table,method="pca",pcaComp=3)
-#trainPCA <- predict(preProc, imputed_merged_table)
-
-#| No PCA, better AUC spec = 0
 library(dplyr)
-temp_merged$label <- as.factor(merged_table$Label) #if we delete line 126 this is also unnecessary
 
-#train <- data_frame()
-#test <- data_frame()
-#for (i in seq(1, nrow(imputed_merged_table), by=5193)) {
-# q <- imputed_merged_table[ c(i:(i+5192)), ]
-#intrain <- 
-#train<-rbind(train, q[1:4154,])
-#test<-rbind(test, q[4155:5193,])
-#print(i)
-#}
+temp_merged <- merged_table
+temp_merged$label <- as.factor(temp_merged$label)
+
 
 #split train and test
 intrain <- createDataPartition(y = temp_merged$label, p= 0.8, list = FALSE)
@@ -153,18 +115,30 @@ train <- temp_merged[intrain,]
 test <- temp_merged[-intrain,]
 
 #only remove id and date of visit, if we do want imputation
-train<- train [-c(1:2, 16)]
+train_temp<- train [-c(1:2, 15)]
 
 #imputation
-imputed_data <- mice(train, m=5, method = "rf")
+library("mice")
+imputed_data <- mice(train_temp, m=5, method = "rf")
 summary(imputed_data)
-train <- complete(imputed_data, "long")
+train_temp <- complete(imputed_data, "long")
 
 #add labels back???
+labels <- rep(train$label, 5)
+train <- cbind(train_temp, labels)
+train$label <- as.factor(train$label)
 
-#train 
-library(ROSE)
-train <- ovun.sample(label~., data=train, method = "both", N=nrow(train))$data
+test_temp<- test[-c(1:2, 15)]
+
+#imputation
+imputed_data <- mice(test_temp, m=5, method = "rf")
+summary(imputed_data)
+test_temp <- complete(imputed_data, "long")
+
+#add labels back???
+labels <- rep(test$label, 5)
+test <- cbind(test_temp, labels)
+test$label <- as.factor(test$label)
 
 train <- train  %>% 
   mutate(label = factor(label, 
@@ -181,8 +155,6 @@ train_control <- trainControl(method = "adaptive_cv",
                               summaryFunction = twoClassSummary,
                               verboseIter = TRUE)
                               
-
-train_control <- trainControl(method="cv", number=5, classProbs = TRUE, summaryFunction = twoClassSummary)
 
 test <- test  %>% 
   mutate(label = factor(label, 
