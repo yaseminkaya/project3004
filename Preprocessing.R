@@ -50,7 +50,7 @@ for (a in 1:nrow(merged_table)) {
   }
 }
 
-      
+
 #Death within 60 days
 
 merged_table$label_death <- 0
@@ -58,12 +58,12 @@ for (a in 1:nrow(merged_table)) {
   for (c in 1:nrow(deaths)) {
     if (merged_table$id[a] == deaths$id[c]) {
       if (!is.na(deaths$date_of_death[c]) & difftime((as.Date(deaths$date_of_death[c])),
-                     (as.Date(merged_table$date[a])),
-                     units = "days") <= 60 &
-            difftime((as.Date(deaths$date_of_death[c])),
-                     (as.Date(merged_table$date[a])), 
-                     units = "days") > 0) {
-          merged_table$label_death[a] <- '1'
+                                                     (as.Date(merged_table$date[a])),
+                                                     units = "days") <= 60 &
+          difftime((as.Date(deaths$date_of_death[c])),
+                   (as.Date(merged_table$date[a])), 
+                   units = "days") > 0) {
+        merged_table$label_death[a] <- '1'
       }
     }
   }
@@ -106,8 +106,8 @@ library("mice")
 #apply(merged_table,1,pMiss)
 #md.pattern(merged_table)
 #aggr_plot <- aggr(merged_table, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE, 
-                  #labels=names(data), cex.axis=.7, gap=3, 
-                  #ylab=c("Histogram of missing data","Pattern"))
+#labels=names(data), cex.axis=.7, gap=3, 
+#ylab=c("Histogram of missing data","Pattern"))
 
 #Necessary columns as factor, can also be already done in earlier part of code
 merged_table$orthopnea <- as.factor(merged_table$orthopnea)
@@ -125,39 +125,42 @@ names(merged_table)[11] <- 'Cystatin_C'
 #| remove columns labels and make temporary merge file for imputation
 temp_merged <- merged_table[-15]
 
-#Imputation 
-imputed_data <- mice(temp_merged, m=5, method = "rf")
-summary(imputed_data)
-imputed_merged_table <- complete(imputed_data, 1)
-#Here I used random forest, maxit and m is on default and I chose model 1. However when we have an actual model we can play around with these and see what results in the best model.
+#| Remove id, date of visit and categorical variables
+temp_merged <- temp_merged[-c(1:6, 13:14)]
 
-#| Remove id and date of visit
-imputed_merged_table <- imputed_merged_table[-c(1:6, 13:14)]
+#only remove id and date of visit, if we do want imputation
+#temp_merged<- temp_merged [-c(1:2)]
 
-#PCA & Split
-
+#PCA
 library(caret)
 #preProc <- preProcess(imputed_merged_table,method="pca",pcaComp=3)
 #trainPCA <- predict(preProc, imputed_merged_table)
 
 #| No PCA, better AUC spec = 0
 library(dplyr)
-imputed_merged_table$label <- as.factor(merged_table$Label)
+temp_merged$label <- as.factor(merged_table$Label) #if we delete line 126 this is also unnecessary
 
 #train <- data_frame()
 #test <- data_frame()
 #for (i in seq(1, nrow(imputed_merged_table), by=5193)) {
- # q <- imputed_merged_table[ c(i:(i+5192)), ]
-  #intrain <- 
-  #train<-rbind(train, q[1:4154,])
-  #test<-rbind(test, q[4155:5193,])
-  #print(i)
+# q <- imputed_merged_table[ c(i:(i+5192)), ]
+#intrain <- 
+#train<-rbind(train, q[1:4154,])
+#test<-rbind(test, q[4155:5193,])
+#print(i)
 #}
 
-intrain <- createDataPartition(y = imputed_merged_table$label, p= 0.8, list = FALSE)
-train <- imputed_merged_table[intrain,]
-test <- imputed_merged_table[-intrain,]
+#split train and test
+intrain <- createDataPartition(y = temp_merged$label, p= 0.8, list = FALSE)
+train <- temp_merged[intrain,]
+test <- temp_merged[-intrain,]
 
+#imputation
+#imputed_data <- mice(train, m=5, method = "rf")
+#summary(imputed_data)
+#train <- complete(imputed_data, "long")
+
+#train 
 library(ROSE)
 train <- ovun.sample(label~., data=train, method = "both", N=nrow(train))$data
 
@@ -165,15 +168,17 @@ train <- train  %>%
   mutate(label = factor(label, 
                         labels = make.names(levels(label))))
 
-#train_control <- trainControl(method="adaptive_cv", 
-#                              number=5, repeats = 5, 
-#                              adaptive = list (min=2, 
-#                                               alpha=0.05, 
-#                                               method="gls", 
-#                                               complete= FALSE),
-#                              classProbs = TRUE, 
-#                              summaryFunction = twoClassSummary,
-#                              verboseIter = TRUE)
+train_control <- trainControl(method = "adaptive_cv",
+                              number = 5,
+                              repeats = 5,
+                              adaptive = list (min = 2,
+                                               alpha = 0.05,
+                                               method ="gls",
+                                               complete = FALSE),
+                              classProbs = TRUE,
+                              summaryFunction = twoClassSummary,
+                              verboseIter = TRUE)
+                              
 
 train_control <- trainControl(method="cv", number=5, classProbs = TRUE, summaryFunction = twoClassSummary)
 
@@ -250,28 +255,6 @@ NB<-train_model("nb")
 test_NB<-predict_model(NB)
 calibration(test_NB)
 ROC_AUC(test_NB)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
