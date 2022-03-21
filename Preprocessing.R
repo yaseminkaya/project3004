@@ -127,6 +127,7 @@ train_temp <- complete(imputed_data, "long")
 labels <- rep(train$label, 5)
 train <- cbind(train_temp, labels)
 train$label <- as.factor(train$label)
+train<- train[-c(1:2)]
 
 test_temp<- test[-c(1:2, 15)]
 
@@ -139,6 +140,7 @@ test_temp <- complete(imputed_data, "long")
 labels <- rep(test$label, 5)
 test <- cbind(test_temp, labels)
 test$label <- as.factor(test$label)
+test<- test[-c(1:2)]
 
 train <- train  %>% 
   mutate(label = factor(label, 
