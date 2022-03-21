@@ -1,6 +1,6 @@
 #Load data
 
-datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
+#datafolder <- "C:/Users/yyase/Downloads/Core Project Data/"
 #datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
 #datafolder <- "C:/Users/sradu/OneDrive/Documenten/year 3/The core of Biomdical Sciences/Project R/Code Project R/"
 datafolder <- "C:/Users/Punkt/Downloads/Core Project Data/"
@@ -128,11 +128,11 @@ temp_merged <- merged_table[-15]
 #Imputation 
 imputed_data <- mice(temp_merged, m=5, method = "rf")
 summary(imputed_data)
-imputed_merged_table <- complete(imputed_data, "long")
+imputed_merged_table <- complete(imputed_data, 1)
 #Here I used random forest, maxit and m is on default and I chose model 1. However when we have an actual model we can play around with these and see what results in the best model.
 
 #| Remove id and date of visit
-imputed_merged_table <- imputed_merged_table[-c(1:4)]
+imputed_merged_table <- imputed_merged_table[-c(1:6, 13:14)]
 
 #PCA & Split
 
@@ -144,15 +144,19 @@ library(caret)
 library(dplyr)
 imputed_merged_table$label <- as.factor(merged_table$Label)
 
-train <- data_frame()
-test <- data_frame()
-for (i in seq(1, nrow(imputed_merged_table), by=5193)) {
-  q <- imputed_merged_table[ c(i:(i+5192)), ]
-  intrain <- 
-  train<-rbind(train, q[1:4154,])
-  test<-rbind(test, q[4155:5193,])
-  print(i)
-}
+#train <- data_frame()
+#test <- data_frame()
+#for (i in seq(1, nrow(imputed_merged_table), by=5193)) {
+ # q <- imputed_merged_table[ c(i:(i+5192)), ]
+  #intrain <- 
+  #train<-rbind(train, q[1:4154,])
+  #test<-rbind(test, q[4155:5193,])
+  #print(i)
+#}
+
+intrain <- createDataPartition(y = imputed_merged_table$label, p= 0.8, list = FALSE)
+train <- imputed_merged_table[intrain,]
+test <- imputed_merged_table[-intrain,]
 
 library(ROSE)
 train <- ovun.sample(label~., data=train, method = "both", N=nrow(train))$data
@@ -161,16 +165,17 @@ train <- train  %>%
   mutate(label = factor(label, 
                         labels = make.names(levels(label))))
 
-train_control <- trainControl(method="adaptive_cv", 
-                              number=5, repeats = 5, 
-                              adaptive = list (min=2, 
-                                               alpha=0.05, 
-                                               method="gls", 
-                                               complete= FALSE),
-                              classProbs = TRUE, 
-                              summaryFunction = twoClassSummary,
-                              verboseIter = TRUE)
+#train_control <- trainControl(method="adaptive_cv", 
+#                              number=5, repeats = 5, 
+#                              adaptive = list (min=2, 
+#                                               alpha=0.05, 
+#                                               method="gls", 
+#                                               complete= FALSE),
+#                              classProbs = TRUE, 
+#                              summaryFunction = twoClassSummary,
+#                              verboseIter = TRUE)
 
+train_control <- trainControl(method="cv", number=5, classProbs = TRUE, summaryFunction = twoClassSummary)
 
 test <- test  %>% 
   mutate(label = factor(label, 
