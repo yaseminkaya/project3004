@@ -124,8 +124,8 @@ summary(imputed_data)
 train_temp <- complete(imputed_data, "long")
 
 #add labels back???
-labels <- rep(train$label, 5)
-train <- cbind(train_temp, labels)
+label <- rep(train$label, 5)
+train <- cbind(train_temp, label)
 train$label <- as.factor(train$label)
 train<- train[-c(1:2)]
 
@@ -137,8 +137,8 @@ summary(imputed_data)
 test_temp <- complete(imputed_data, "long")
 
 #add labels back???
-labels <- rep(test$label, 5)
-test <- cbind(test_temp, labels)
+label <- rep(test$label, 5)
+test <- cbind(test_temp, label)
 test$label <- as.factor(test$label)
 test<- test[-c(1:2)]
 
