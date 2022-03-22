@@ -110,9 +110,13 @@ temp_merged$label <- as.factor(temp_merged$label)
 
 
 #split train and test
-intrain <- createDataPartition(y = temp_merged$label, p= 0.8, list = FALSE)
-train <- temp_merged[intrain,]
-test <- temp_merged[-intrain,]
+test <- temp_merged[complete.cases(temp_merged), ]
+train <- temp_merged[!complete.cases(temp_merged), ]
+test<- test[-c(1:2)]
+
+#intrain <- createDataPartition(y = temp_merged$label, p= 0.8, list = FALSE)
+#train <- temp_merged[intrain,]
+#test <- temp_merged[-intrain,]
 
 #only remove id and date of visit, if we do want imputation
 train_temp<- train [-c(1:2, 15)]
@@ -129,19 +133,6 @@ train <- cbind(train_temp, label)
 train$label <- as.factor(train$label)
 train<- train[-c(1:2)]
 
-test_temp<- test[-c(1:2, 15)]
-
-#imputation
-imputed_data <- mice(test_temp, m=5, method = "rf")
-summary(imputed_data)
-test_temp <- complete(imputed_data, "long")
-
-#add labels back???
-label <- rep(test$label, 5)
-test <- cbind(test_temp, label)
-test$label <- as.factor(test$label)
-test<- test[-c(1:2)]
-
 train <- train  %>% 
   mutate(label = factor(label, 
                         labels = make.names(levels(label))))
@@ -156,6 +147,8 @@ train_control <- trainControl(method = "adaptive_cv",
                               classProbs = TRUE,
                               summaryFunction = twoClassSummary,
                               verboseIter = TRUE)
+
+train_control <- trainControl(method="cv", number=5, classProbs = TRUE, summaryFunction = twoClassSummary)
                               
 
 test <- test  %>% 
@@ -225,12 +218,6 @@ ANN<-train_model("nnet")
 test_ANN<-predict_model(ANN)
 calibration(test_ANN)
 ROC_AUC(test_ANN)
-
-#|NB
-NB<-train_model("nb")
-test_NB<-predict_model(NB)
-calibration(test_NB)
-ROC_AUC(test_NB)
 
 
 
