@@ -102,51 +102,31 @@ names(merged_table)[9] <- 'IL_6'
 names(merged_table)[10] <- 'GFR'
 names(merged_table)[11] <- 'Cystatin_C'
 
+temp_merged <- merged_table[-c(1:2,15)]
+
+#Imputation 
+library("mice")
+imputed_data <- mice(temp_merged, m=5, method = "rf")
+summary(imputed_data)
+imputed_merged_table <- complete(imputed_data, 1)
+#Here I used random forest, maxit and m is on default and I chose model 1. However when we have an actual model we can play around with these and see what results in the best model.
+
+
 library(caret)
 library(dplyr)
 
-temp_merged <- merged_table
-temp_merged$label <- as.factor(temp_merged$label)
+set.seed(2308)
 
+imputed_merged_table$label <- as.factor(merged_table$label)
 
-#split train and test
-test <- temp_merged[complete.cases(temp_merged), ]
-train <- temp_merged[!complete.cases(temp_merged), ]
-test<- test[-c(1:2)]
-
-#intrain <- createDataPartition(y = temp_merged$label, p= 0.8, list = FALSE)
-#train <- temp_merged[intrain,]
-#test <- temp_merged[-intrain,]
-
-#only remove id and date of visit, if we do want imputation
-train_temp<- train [-c(1:2, 15)]
-
-#imputation
-library("mice")
-imputed_data <- mice(train_temp, m=5, method = "rf")
-summary(imputed_data)
-train_temp <- complete(imputed_data, "long")
-
-#add labels back???
-label <- rep(train$label, 5)
-train <- cbind(train_temp, label)
-train$label <- as.factor(train$label)
-train<- train[-c(1:2)]
+intrain <- createDataPartition(y = imputed_merged_table$label, p= 0.8, list = FALSE)
+train <- imputed_merged_table[intrain,]
+test <- imputed_merged_table[-intrain,]
 
 train <- train  %>% 
   mutate(label = factor(label, 
                         labels = make.names(levels(label))))
 
-train_control <- trainControl(method = "adaptive_cv",
-                              number = 5,
-                              repeats = 5,
-                              adaptive = list (min = 2,
-                                               alpha = 0.05,
-                                               method ="gls",
-                                               complete = FALSE),
-                              classProbs = TRUE,
-                              summaryFunction = twoClassSummary,
-                              verboseIter = TRUE)
 
 train_control <- trainControl(method="cv", number=5, classProbs = TRUE, summaryFunction = twoClassSummary)
                               
