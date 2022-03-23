@@ -165,12 +165,14 @@ LR<-train_model("glm")
 test_LR<-predict_model(LR)
 calibration(test_LR)
 ROC_AUC(test_LR)
+plot(varImp(LR, scale = TRUE))
 
 #|SVM
 svmLinear<-train_model("svmLinear")
 test_svmLinear<-predict_model(svmLinear)
 calibration(test_svmLinear)
 ROC_AUC(test_svmLinear)
+plot(varImp(svmLinear, scale = TRUE)) #Error in auc3_(actual, predicted, ranks) : Not compatible with requested type: [type=character; target=double].
 
 #|RF
 RF<-train_model("rf")
@@ -186,19 +188,21 @@ CART<-train_model("rpart")
 test_CART<-predict_model(CART)
 calibration(test_CART)
 ROC_AUC(test_CART)
+plot(varImp(CART, scale = TRUE))
 
 #|kNN
 kNN<-train_model("knn")
 test_kNN<-predict_model(kNN)
 calibration(test_kNN)
 ROC_AUC(test_kNN)
+plot(varImp(kNN, scale = TRUE)) #Error in auc3_(actual, predicted, ranks) : Not compatible with requested type: [type=character; target=double].
 
 #|ANN
 ANN<-train_model("nnet")
 test_ANN<-predict_model(ANN)
 calibration(test_ANN)
 ROC_AUC(test_ANN)
-
+plot(varImp(ANN, scale = TRUE))
 
 
 
