@@ -94,6 +94,8 @@ merged_table$orthopnea <- as.factor(merged_table$orthopnea)
 merged_table$oedema <- as.factor(merged_table$oedema)
 merged_table$cough <- as.factor(merged_table$cough)
 merged_table$rales <- as.factor(merged_table$rales)
+merged_table$gender <- as.factor(merged_table$gender)
+merged_table$causeHF <- as.factor(merged_table$causeHF)
 
 #| rename columns because of the spaces
 names(merged_table)[7] <- 'NT_BNP'
@@ -172,7 +174,7 @@ svmLinear<-train_model("svmLinear")
 test_svmLinear<-predict_model(svmLinear)
 calibration(test_svmLinear)
 ROC_AUC(test_svmLinear)
-plot(varImp(svmLinear, scale = TRUE)) #Error in auc3_(actual, predicted, ranks) : Not compatible with requested type: [type=character; target=double].
+plot(varImp(svmLinear, scale = TRUE))
 
 #|RF
 RF<-train_model("rf")
@@ -195,7 +197,7 @@ kNN<-train_model("knn")
 test_kNN<-predict_model(kNN)
 calibration(test_kNN)
 ROC_AUC(test_kNN)
-plot(varImp(kNN, scale = TRUE)) #Error in auc3_(actual, predicted, ranks) : Not compatible with requested type: [type=character; target=double].
+plot(varImp(kNN, scale = TRUE))
 
 #|ANN
 ANN<-train_model("nnet")
